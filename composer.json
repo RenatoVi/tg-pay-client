@@ -1,0 +1,29 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "tech-genus/tg-pay-php-client",
+    "description": "Laravel client for tg-pay payment API",
+    "type": "library",
+    "license": "MIT",
+    "version": "dev-main",
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^10.0|^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "TechGenus\\TgPay\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "TechGenus\\TgPay\\TgPayServiceProvider"
+            ],
+            "aliases": {
+                "TgPay": "TechGenus\\TgPay\\Facade\\TgPay"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
