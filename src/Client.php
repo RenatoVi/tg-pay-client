@@ -12,6 +12,7 @@ use TechGenus\TgPay\DTO\Request\CreateCheckoutSessionRequestDto;
 use TechGenus\TgPay\DTO\Request\CreatePaymentRequestDto;
 use TechGenus\TgPay\DTO\Request\CreateSubscriptionRequestDto;
 use TechGenus\TgPay\DTO\Request\UpdateSubscriptionItemRequestDto;
+use TechGenus\TgPay\DTO\Request\UpdateSubscriptionRequestDto;
 use TechGenus\TgPay\DTO\Response\BankItemDto;
 use TechGenus\TgPay\DTO\Response\BillingPortalResponseDto;
 use TechGenus\TgPay\DTO\Response\HealthResponseDto;
@@ -99,6 +100,19 @@ class Client
     public function getSubscription(string $subscriptionId): SubscriptionResponseDto
     {
         $raw = $this->get("/subscriptions/{$subscriptionId}");
+        return $this->subscriptionFromResponse($raw);
+    }
+
+    /**
+     * Altera o valor da assinatura no gateway.
+     *
+     * Vale para gateway que cobra um valor unico por assinatura (Asaas).
+     * Quem trabalha por itens (Stripe) usa updateSubscriptionItem.
+     */
+    public function updateSubscription(string $subscriptionId, UpdateSubscriptionRequestDto|array $payload): SubscriptionResponseDto
+    {
+        $body = $payload instanceof UpdateSubscriptionRequestDto ? $payload->toArray() : $payload;
+        $raw = $this->patch("/subscriptions/{$subscriptionId}", $body);
         return $this->subscriptionFromResponse($raw);
     }
 
