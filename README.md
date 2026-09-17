@@ -311,6 +311,43 @@ $subscription = $client->createSubscription([
 ]);
 ```
 
+### Assinatura por boleto ou pix
+
+Boleto e pix nao passam pelo checkout hospedado (o Asaas so aceita cartao em
+`chargeTypes RECURRENT`): a assinatura e criada direto, e a resposta traz a
+cobranca do primeiro ciclo para mostrar ao cliente.
+
+```php
+$subscription = $client->createSubscription([
+    'amount'         => 197.00,
+    'currency'       => 'BRL',
+    'description'    => 'Plano anual',
+    'cycle'          => 'MONTHLY',
+    'customer'       => [/* ... */],
+    'payment_method' => ['type' => 'boleto'],   // ou 'pix'
+]);
+
+$cobranca = $subscription->charge;              // null em cartao
+echo $cobranca?->payableUrl();                  // PDF do boleto, ou a fatura
+echo $cobranca?->dueDate;                       // "2026-10-01"
+```
+
+`next_due_date` pode ser omitido: em boleto e pix quem define o vencimento e o
+gateway.
+
+### Cobranca em aberto
+
+⚠ Boleto e pix emitem uma cobranca **nova a cada ciclo** — a devolvida na
+criacao vale so para o primeiro. A atual sai daqui:
+
+```php
+$cobranca = $client->getSubscriptionCharge('sub_123');
+
+if ($cobranca === null) {
+    // Nada em aberto: tudo pago, ou assinatura de cartao (debitada sozinha).
+}
+```
+
 ### Consultar assinatura
 
 ```php
