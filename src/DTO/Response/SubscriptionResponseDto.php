@@ -12,6 +12,13 @@ final class SubscriptionResponseDto
         public readonly ?string $cycle = null,
         public readonly ?string $startedAt = null,
         public readonly ?string $canceledAt = null,
+        /**
+         * Cobrança do PRIMEIRO ciclo, em boleto e pix. Nula em cartão.
+         *
+         * Vence: a partir do segundo ciclo o gateway emite outra, e a atual sai
+         * de Client::getSubscriptionCharge().
+         */
+        public readonly ?ChargeDto $charge = null,
     ) {
     }
 
@@ -23,6 +30,9 @@ final class SubscriptionResponseDto
             cycle: $data['cycle'] ?? null,
             startedAt: $data['started_at'] ?? null,
             canceledAt: $data['canceled_at'] ?? null,
+            charge: ! empty($data['charge']) && is_array($data['charge'])
+                ? ChargeDto::fromArray($data['charge'])
+                : null,
         );
     }
 }

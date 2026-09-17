@@ -13,6 +13,7 @@ use TechGenus\TgPay\DTO\Request\CreatePaymentRequestDto;
 use TechGenus\TgPay\DTO\Request\CreateSubscriptionRequestDto;
 use TechGenus\TgPay\DTO\Request\UpdateSubscriptionItemRequestDto;
 use TechGenus\TgPay\DTO\Request\UpdateSubscriptionRequestDto;
+use TechGenus\TgPay\DTO\Response\ChargeDto;
 use TechGenus\TgPay\DTO\Response\BankItemDto;
 use TechGenus\TgPay\DTO\Response\BillingPortalResponseDto;
 use TechGenus\TgPay\DTO\Response\HealthResponseDto;
@@ -89,6 +90,24 @@ class Client
         $body = $payload instanceof CreateSubscriptionRequestDto ? $payload->toArray() : $payload;
         $raw = $this->post('/subscriptions', $body);
         return $this->subscriptionFromResponse($raw);
+    }
+
+    /**
+     * Cobrança em aberto da assinatura (boleto/pix).
+     *
+     * Consulta o gateway a cada chamada de propósito: boleto e pix emitem uma
+     * cobrança NOVA a cada ciclo, então a devolvida na criação da assinatura
+     * vence depois da primeira renovação.
+     *
+     * Devolve null quando não há nada em aberto — tudo pago, ou assinatura de
+     * cartão, que é debitada sozinha.
+     */
+    public function getSubscriptionCharge(string $subscriptionId): ?ChargeDto
+    {
+        $raw = $this->get("/subscriptions/{$subscriptionId}/charge");
+        $data = $raw['data'] ?? null;
+
+        return ! empty($data) && is_array($data) ? ChargeDto::fromArray($data) : null;
     }
 
     public function createCheckoutSession(CreateCheckoutSessionRequestDto|array $payload): array
